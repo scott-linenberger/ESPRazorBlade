@@ -58,7 +58,6 @@ Lightweight Arduino library for ESP32 devices to broadcast device telemetry and 
 **Note**: Each example includes `Configuration.h` with placeholders. Edit it with your credentials; your changes stay local.
 
 **Available examples:**
-- `Ping_Test` - Hardware verification (no Configuration.h needed; start here if troubleshooting)
 - `Basic_Usage` - Minimal setup with built-in telemetry
 - `Basic_MQTT_NoAuth` - Simple MQTT without authentication
 - `MQTT_With_Auth` - Secure MQTT with username/password
@@ -66,7 +65,6 @@ Lightweight Arduino library for ESP32 devices to broadcast device telemetry and 
 ## Quick Start
 
 > **👉 See complete, ready-to-use examples in the [`examples/`](examples/) directory:**
-> - **[Ping_Test](examples/Ping_Test/)** - Hardware verification (no config needed)
 > - **[Basic_Usage](examples/Basic_Usage/)** - Minimal setup with built-in telemetry
 > - **[Basic_MQTT_NoAuth](examples/Basic_MQTT_NoAuth/)** - Simple MQTT without authentication
 > - **[MQTT_With_Auth](examples/MQTT_With_Auth/)** - Secure MQTT with username/password

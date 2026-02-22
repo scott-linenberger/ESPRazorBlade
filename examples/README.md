@@ -14,46 +14,7 @@ Ready-to-use example sketches demonstrating different features of the ESPRazorBl
 
 ## Available Examples
 
-### 1. Ping_Test
-
-**Hardware verification sketch - start here if you're having issues!**
-
-A minimal test that prints "ping" to Serial Monitor every second. No WiFi, no MQTT, no Configuration.h needed.
-
-**Use this to verify:**
-- ESP32 board is functional
-- Arduino IDE can compile and upload
-- Serial Monitor communication works
-- USB cable and drivers are working
-
-**Best for:**
-- First-time setup verification
-- Troubleshooting hardware or IDE problems
-- Testing a new ESP32 board
-
-**Configuration:**
-- None required!
-
-**Expected output:**
-```
-===========================================
-   ESPRazorBlade - Hardware Ping Test
-===========================================
-
-If you see this message, your ESP32 board
-and Serial Monitor are working correctly!
-
-You should see 'ping' messages below:
--------------------------------------------
-ping
-ping
-ping
-...
-```
-
----
-
-### 2. Basic_Usage
+### 1. Basic_Usage
 
 **The simplest way to use ESPRazorBlade - just WiFi, MQTT, and automatic telemetry!**
 
@@ -101,7 +62,7 @@ mosquitto_sub -h 192.168.1.100 -t "my-esp32/telemetry/#" -v
 
 ---
 
-### 3. Basic_MQTT_NoAuth (Custom Telemetry)
+### 2. Basic_MQTT_NoAuth (Custom Telemetry)
 
 **Learn how to add your own sensor callbacks alongside built-in telemetry.**
 
@@ -153,7 +114,7 @@ mosquitto_sub -h 192.168.1.100 -t "my-esp32/#" -v
 
 ---
 
-### 4. MQTT_With_Auth
+### 3. MQTT_With_Auth
 
 **Production-ready example with MQTT authentication and custom topic organization.**
 
@@ -248,20 +209,17 @@ sudo systemctl restart mosquitto
 ```
 Start Here
     ↓
-[Ping_Test] ────→ Hardware/IDE issues? ───→ Fix, then retry
-    ↓ OK
-[Basic_Usage] ───→ Need sensors? ──→ Yes ──→ [Custom_Telemetry]
-    ↓ No                                            ↓
-    Done!                              Need auth? ──→ [MQTT_With_Auth]
-                                            ↓ No
-                                           Done!
+[Basic_Usage] ───→ Need sensors? ──→ Yes ──→ [Basic_MQTT_NoAuth]
+    ↓ No                                    ↓
+    Done!                      Need auth? ──→ [MQTT_With_Auth]
+                                    ↓ No
+                                   Done!
 ```
 
 **Decision guide:**
-- **Just starting?** → Ping_Test, then Basic_Usage
+- **Just starting?** → Basic_Usage
 - **Adding sensors?** → Basic_MQTT_NoAuth (Custom Telemetry)
 - **Need security?** → MQTT_With_Auth
-- **Having problems?** → Ping_Test for hardware verification
 
 ---
 
@@ -386,19 +344,17 @@ mosquitto_pub -h 192.168.1.100 -t "my-esp32/config/telemetry/timeouts/wifi_rssi"
 
 - Check the main [README](../README.md) for API documentation
 - Review [troubleshooting section](#common-troubleshooting) above
-- Start with Ping_Test if you're having hardware issues
 - Verify Configuration.h is properly set up for your network
 
 ## Example Comparison
 
-| Feature | Ping_Test | Basic_Usage | Custom_Telemetry | MQTT_With_Auth |
-|---------|-----------|-------------|------------------|----------------|
-| Hardware test | ✅ | ❌ | ❌ | ❌ |
-| WiFi connection | ❌ | ✅ | ✅ | ✅ |
-| MQTT connection | ❌ | ✅ | ✅ | ✅ |
-| Built-in telemetry | ❌ | ✅ | ✅ | ✅ |
-| Custom callbacks | ❌ | ❌ | ✅ | ✅ |
-| MQTT authentication | ❌ | ❌ | ❌ | ✅ |
-| Manual publishing | ❌ | ❌ | ✅ | ✅ |
-| Retained messages | ❌ | ❌ | ✅ | ✅ |
-| Complexity | 🟢 Minimal | 🟢 Easy | 🟡 Moderate | 🟠 Advanced |
+| Feature | Basic_Usage | Basic_MQTT_NoAuth | MQTT_With_Auth |
+|---------|-------------|-------------------|----------------|
+| WiFi connection | ✅ | ✅ | ✅ |
+| MQTT connection | ✅ | ✅ | ✅ |
+| Built-in telemetry | ✅ | ✅ | ✅ |
+| Custom callbacks | ❌ | ✅ | ✅ |
+| MQTT authentication | ❌ | ❌ | ✅ |
+| Manual publishing | ❌ | ✅ | ✅ |
+| Retained messages | ❌ | ✅ | ✅ |
+| Complexity | 🟢 Minimal | 🟡 Moderate | 🟠 Advanced |
