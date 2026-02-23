@@ -159,6 +159,45 @@ mosquitto_sub -h mqtt.example.com -u esp32_user -P secure_password -t "sensors/#
 mosquitto_sub -h mqtt.example.com -u esp32_user -P secure_password -t "device/#" -v
 ```
 
+**Optional TLS:** Uncomment the TLS block in Configuration.h and create `ca_cert.h` with `MQTT_CA_CERT` to use MQTT over port 8883.
+
+---
+
+### 4. MQTT_With_TLS
+
+**MQTT over TLS with CA certificate verification.**
+
+This example demonstrates encrypted MQTT connections (port 8883) with server certificate verification. Use for production deployments over the internet.
+
+**Shows:**
+- MQTT over TLS (port 8883)
+- CA certificate verification via `ca_cert.h`
+- MQTT username/password authentication
+- Built-in telemetry
+
+**Best for:**
+- Production deployments over the internet
+- Brokers requiring TLS (e.g., test.mosquitto.org)
+- Protecting credentials and telemetry in transit
+
+**Configuration:**
+```cpp
+// In Configuration.h
+#define MQTT_USE_TLS
+#define MQTT_BROKER "test.mosquitto.org"
+#define MQTT_PORT 8883
+#define MQTT_USERNAME "your_username"
+#define MQTT_PASSWORD "your_password"
+```
+
+**ca_cert.h:** Create this file in the example folder with your broker's CA certificate (PEM format). For test.mosquitto.org, download from https://test.mosquitto.org/ssl/
+
+**Monitor with mosquitto (TLS):**
+```bash
+mosquitto_sub -h test.mosquitto.org -p 8883 -t "my-esp32/#" -v \
+  --cafile mosquitto.org.crt -u <username> -P <password>
+```
+
 ---
 
 ## Prerequisites
@@ -213,13 +252,16 @@ Start Here
     ↓ No                                    ↓
     Done!                      Need auth? ──→ [MQTT_With_Auth]
                                     ↓ No
+                    Need TLS/encryption? ──→ [MQTT_With_TLS]
+                                    ↓ No
                                    Done!
 ```
 
 **Decision guide:**
 - **Just starting?** → Basic_Usage
 - **Adding sensors?** → Basic_MQTT_NoAuth (Custom Telemetry)
-- **Need security?** → MQTT_With_Auth
+- **Need auth?** → MQTT_With_Auth
+- **Need TLS (internet/production)?** → MQTT_With_TLS
 
 ---
 
@@ -348,13 +390,15 @@ mosquitto_pub -h 192.168.1.100 -t "my-esp32/config/telemetry/timeouts/wifi_rssi"
 
 ## Example Comparison
 
-| Feature | Basic_Usage | Basic_MQTT_NoAuth | MQTT_With_Auth |
-|---------|-------------|-------------------|----------------|
-| WiFi connection | ✅ | ✅ | ✅ |
-| MQTT connection | ✅ | ✅ | ✅ |
-| Built-in telemetry | ✅ | ✅ | ✅ |
-| Custom callbacks | ❌ | ✅ | ✅ |
-| MQTT authentication | ❌ | ❌ | ✅ |
-| Manual publishing | ❌ | ✅ | ✅ |
-| Retained messages | ❌ | ✅ | ✅ |
-| Complexity | 🟢 Minimal | 🟡 Moderate | 🟠 Advanced |
+| Feature | Basic_Usage | Basic_MQTT_NoAuth | MQTT_With_Auth | MQTT_With_TLS |
+|---------|-------------|-------------------|----------------|---------------|
+| WiFi connection | ✅ | ✅ | ✅ | ✅ |
+| MQTT connection | ✅ | ✅ | ✅ | ✅ |
+| Built-in telemetry | ✅ | ✅ | ✅ | ✅ |
+| Custom callbacks | ❌ | ✅ | ✅ | ❌ |
+| MQTT authentication | ❌ | ❌ | ✅ | ✅ (optional) |
+| MQTT over TLS (port 8883) | ❌ | ❌ | ❌ | ✅ |
+| CA certificate verification | ❌ | ❌ | ❌ | ✅ |
+| Manual publishing | ❌ | ✅ | ✅ | ❌ |
+| Retained messages | ❌ | ✅ | ✅ | ✅ |
+| Complexity | 🟢 Minimal | 🟡 Moderate | 🟠 Advanced | 🟠 Advanced |

@@ -5,6 +5,16 @@ All notable changes to the ESPRazorBlade library will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **MQTT over TLS** (Phase 16): Encrypted MQTT connections (port 8883) with CA certificate verification
+  - Define `MQTT_USE_TLS` in Configuration.h to enable
+  - Provide broker CA certificate in `ca_cert.h` (defines `MQTT_CA_CERT`)
+  - MQTT task stack increased to 5120 when TLS enabled (handshake needs more stack)
+- **MQTT_With_TLS example**: Minimal TLS example with Configuration.h and ca_cert.h template
+- **MQTT_With_Auth TLS option**: Commented block in Configuration.h to enable TLS with ca_cert.h
+
 ## [0.1.0-beta] - 2026-02-13
 
 ### Added
@@ -53,10 +63,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Basic_Usage` - Simple WiFi and MQTT connection with built-in telemetry
 - `MQTT_With_Auth` - MQTT connection with username/password authentication
 - `Basic_MQTT_NoAuth` - Basic MQTT without authentication
+- `MQTT_With_TLS` - MQTT over TLS with CA certificate verification
 
 ### Known Limitations
 
-- **Security**: No TLS/SSL support yet - MQTT credentials transmitted in plaintext
+- **Security**: TLS optional via `MQTT_USE_TLS` and `ca_cert.h`; plain MQTT (1883) remains default
 - **Testing**: Tested on ESP32-C3, ESP32-C6, and classic ESP32 (see Tested Hardware below)
 - **Memory**: Requires sufficient heap for WiFi/MQTT operations (typically 30KB+ free)
 - **Configuration**: Hot config updates only support telemetry timeout intervals
@@ -82,4 +93,4 @@ This is a beta release intended for testing and feedback. The API may change bef
 - Use MQTT authentication (username/password) in production
 - Do not expose MQTT broker to public internet without proper security
 - Keep Configuration.h files out of version control (add to .gitignore)
-- TLS/SSL support planned for future release
+- TLS support available via MQTT_With_TLS example or MQTT_USE_TLS in MQTT_With_Auth

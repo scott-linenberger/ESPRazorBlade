@@ -9,6 +9,7 @@ Lightweight Arduino library for ESP32 devices to broadcast device telemetry and 
 - **Resilient WiFi**: Automatic reconnect with retry and status checks
 - **MQTT Connectivity**: ArduinoMqttClient-based connect/reconnect with keepalive polling
 - **MQTT Auth Support**: Optional username/password configuration
+- **MQTT over TLS**: Optional encrypted connections (port 8883) with CA certificate verification
 - **Thread-Safe Publish**: Mutex-protected publish helpers for string/int/float/long
 - **Connection Status APIs**: `isWiFiConnected()`, `isMQTTConnected()`, `getIPAddress()`
 - **RTOS-Based**: FreeRTOS tasks keep networking non-blocking
@@ -61,6 +62,7 @@ Lightweight Arduino library for ESP32 devices to broadcast device telemetry and 
 - `Basic_Usage` - Minimal setup with built-in telemetry
 - `Basic_MQTT_NoAuth` - Simple MQTT without authentication
 - `MQTT_With_Auth` - Secure MQTT with username/password
+- `MQTT_With_TLS` - MQTT over TLS (port 8883) with CA certificate verification
 
 ## Quick Start
 
@@ -68,6 +70,7 @@ Lightweight Arduino library for ESP32 devices to broadcast device telemetry and 
 > - **[Basic_Usage](examples/Basic_Usage/)** - Minimal setup with built-in telemetry
 > - **[Basic_MQTT_NoAuth](examples/Basic_MQTT_NoAuth/)** - Simple MQTT without authentication
 > - **[MQTT_With_Auth](examples/MQTT_With_Auth/)** - Secure MQTT with username/password
+> - **[MQTT_With_TLS](examples/MQTT_With_TLS/)** - MQTT over TLS with CA certificate verification
 
 ### 1. Configure Settings
 
@@ -86,6 +89,10 @@ Edit `Configuration.h` in the example folder (it appears as a tab next to the sk
 // Optional: Uncomment if your MQTT broker requires authentication
 // #define MQTT_USERNAME "your_username"
 // #define MQTT_PASSWORD "your_password"
+
+// Optional: For TLS (port 8883), uncomment and create ca_cert.h with MQTT_CA_CERT
+// #define MQTT_USE_TLS
+// #define MQTT_PORT 8883
 
 // Device Identity & Telemetry Configuration
 #define DEVICE_ID "esp32-c3-frosty"              // Unique device identifier for MQTT topics
@@ -241,7 +248,47 @@ void loop() {
 }
 ```
 
-#### Example 4: Runtime Configuration Changes
+#### Example 4: MQTT With TLS (Encrypted Connection)
+
+Secure MQTT over TLS (port 8883) with CA certificate verification. Use for production or internet-facing brokers.
+
+**Configuration.h:**
+```cpp
+#define WIFI_SSID "your_wifi_ssid"
+#define WIFI_PASSWORD "your_wifi_password"
+#define MQTT_USE_TLS
+#define MQTT_BROKER "test.mosquitto.org"
+#define MQTT_PORT 8883
+#define MQTT_CLIENT_ID "ESPRazorBlade_TLS_Client"
+#define MQTT_USERNAME "your_username"   // Optional for test.mosquitto.org
+#define MQTT_PASSWORD "your_password"  // Optional for test.mosquitto.org
+#define DEVICE_ID "my-esp32"
+```
+
+**ca_cert.h:** Create this file in the same folder as your sketch. Define `MQTT_CA_CERT` with your broker's CA certificate (PEM format). For test.mosquitto.org, download from https://test.mosquitto.org/ssl/
+
+**Sketch:**
+```cpp
+#include "ESPRazorBlade.h"
+#include "Configuration.h"
+
+ESPRazorBlade razorBlade;
+
+void setup() {
+    Serial.begin(115200);
+    razorBlade.begin();
+    while (!razorBlade.isWiFiConnected() || !razorBlade.isMQTTConnected()) {
+        delay(100);
+    }
+    Serial.println("Connected over TLS!");
+}
+
+void loop() {
+    delay(100);
+}
+```
+
+#### Example 5: Runtime Configuration Changes
 
 Monitor and update telemetry intervals via MQTT (no code changes needed).
 
@@ -276,8 +323,8 @@ No restart required!
 
 - **Credentials Protection**: Your WiFi and MQTT credentials are stored in `Configuration.h`. Examples ship with placeholder values; edit in place with your credentials
 - **Use MQTT Authentication**: For production deployments, always enable MQTT username/password authentication by defining `MQTT_USERNAME` and `MQTT_PASSWORD`
-- **Network Security**: This library currently transmits data in plaintext. For sensitive applications, use a secured local network or VPN
-- **Future Enhancement**: TLS/SSL support for encrypted MQTT connections is planned for a future release
+- **Network Security**: Without TLS, MQTT transmits data in plaintext. For sensitive applications, use `MQTT_USE_TLS` with `ca_cert.h`, or a secured local network/VPN
+- **TLS Support**: Define `MQTT_USE_TLS` and provide `ca_cert.h` with `MQTT_CA_CERT` for encrypted MQTT (port 8883)
 
 **Best Practice Workflow:**
 1. Open an example and edit `Configuration.h` with your credentials
@@ -370,7 +417,7 @@ mosquitto_sub -h mqtt.example.com -t "esp32-c3-frosty/config/#" -v
 - **MQTT broker unreachable**:
   - Verify `MQTT_BROKER` IP address is correct
   - Check that MQTT broker is running (test with `mosquitto_sub` or similar)
-  - Ensure firewall allows connection to MQTT port (default: 1883)
+  - Ensure firewall allows connection to MQTT port (1883 for plain, 8883 for TLS)
   - Verify device and broker are on the same network or have routing between them
 - **MQTT authentication failures**:
   - Double-check `MQTT_USERNAME` and `MQTT_PASSWORD` are correct
@@ -379,6 +426,15 @@ mosquitto_sub -h mqtt.example.com -t "esp32-c3-frosty/config/#" -v
 - **MQTT connects but immediately disconnects**:
   - Check for duplicate `MQTT_CLIENT_ID` - each device needs a unique ID
   - Verify MQTT broker max connections limit not reached
+
+#### TLS / Certificate Issues
+- **TLS handshake fails or connection times out**:
+  - Verify `ca_cert.h` exists and defines `MQTT_CA_CERT` with your broker's CA certificate (PEM format)
+  - Ensure the CA cert matches your broker (e.g., test.mosquitto.org cert from https://test.mosquitto.org/ssl/)
+  - Check firewall allows port 8883
+  - Confirm `MQTT_PORT` is 8883 when using TLS
+- **Certificate verification error**:
+  - Replace `ca_cert.h` with the correct CA for your broker - the bundled example cert is for Eclipse Mosquitto test server only
 
 #### Serial Monitor Issues
 - **No serial output or garbled text**: 
@@ -486,8 +542,9 @@ The library uses FreeRTOS tasks for non-blocking operation:
 **Beta Software Notice**: This is a beta release. While the core functionality is stable, you may encounter edge cases or issues. Please report any problems via GitHub Issues.
 
 **Current Limitations:**
-- **No TLS/SSL Support**: MQTT connections are unencrypted. Use on trusted networks only. TLS/SSL support planned for future release.
+- **TLS Optional**: Plain MQTT (port 1883) is default; enable `MQTT_USE_TLS` and provide `ca_cert.h` for encrypted connections (port 8883).
 - **Plaintext Credentials**: WiFi and MQTT credentials stored in plaintext in `Configuration.h`. Keep this file local and never commit it.
+- **TLS Encryption**: For production, use `MQTT_With_TLS` or enable `MQTT_USE_TLS` in `MQTT_With_Auth`; provide your broker's CA certificate in `ca_cert.h`.
 - **Maximum Callbacks**: Up to 10 total telemetry callbacks (includes 3 built-in metrics, leaving 7 for custom telemetry).
 - **Configuration Timeout Ranges**: Valid telemetry interval range is 1000ms (1 second) to 86400000ms (24 hours).
 
@@ -503,7 +560,6 @@ The library uses FreeRTOS tasks for non-blocking operation:
 - Monitor free heap via telemetry to ensure adequate memory
 
 **Future Enhancements (Post-Beta):**
-- TLS/SSL encryption for MQTT
 - Arduino Library Manager distribution
 - Additional sensor integration examples
 - Power management / deep sleep examples

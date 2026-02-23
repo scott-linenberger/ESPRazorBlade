@@ -7,6 +7,9 @@
 // Use quotes so the compiler searches the sketch directory first.
 // This ensures each sketch uses its own Configuration.h.
 #include "Configuration.h"
+#ifdef MQTT_USE_TLS
+  #include <WiFiClientSecure.h>
+#endif
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
@@ -124,9 +127,13 @@ public:
     bool registerTelemetry(const char* topic, TelemetryCallback callback, unsigned long intervalMs);
 
 private:
-    // WiFi client
+    // WiFi client (plain TCP or TLS based on MQTT_USE_TLS)
+#ifdef MQTT_USE_TLS
+    WiFiClientSecure wifiClient;
+#else
     WiFiClient wifiClient;
-    
+#endif
+
     // MQTT client
     MqttClient mqttClient;
     

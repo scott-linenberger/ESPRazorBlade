@@ -11,6 +11,11 @@
 #define MQTT_PORT 1883
 #define MQTT_CLIENT_ID "ESPRazorBlade_Client"
 
+// Optional: Enable MQTT over TLS (port 8883)
+// Uncomment the block below and create ca_cert.h with MQTT_CA_CERT defined.
+// #define MQTT_USE_TLS
+// #define MQTT_PORT 8883
+
 // MQTT Authentication (required for this example)
 #define MQTT_USERNAME "your_mqtt_username"
 #define MQTT_PASSWORD "your_mqtt_password"

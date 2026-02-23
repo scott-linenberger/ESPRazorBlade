@@ -1,6 +1,13 @@
 #include "ESPRazorBlade.h"
 #include "esp_system.h"
 
+#ifdef MQTT_USE_TLS
+  #include "ca_cert.h"
+  #ifndef MQTT_CA_CERT
+    #error "MQTT_USE_TLS requires ca_cert.h defining MQTT_CA_CERT"
+  #endif
+#endif
+
 // Static instance pointer for callback access
 ESPRazorBlade* ESPRazorBlade::instance = nullptr;
 
@@ -66,7 +73,11 @@ const int MQTT_INITIAL_DELAY_MS = 3000; // Wait 3 seconds after WiFi connects be
 
 // Task stack sizes (in words, 4 bytes each on ESP32)
 const int WIFI_TASK_STACK_SIZE = 4096;
-const int MQTT_TASK_STACK_SIZE = 4096;
+#ifdef MQTT_USE_TLS
+  const int MQTT_TASK_STACK_SIZE = 5120;  // TLS handshake needs more stack
+#else
+  const int MQTT_TASK_STACK_SIZE = 4096;
+#endif
 
 // Task priorities
 const int WIFI_TASK_PRIORITY = 1;
@@ -298,7 +309,11 @@ void ESPRazorBlade::connectMQTT() {
     #ifdef MQTT_USERNAME
         mqttClient.setUsernamePassword(MQTT_USERNAME, MQTT_PASSWORD);
     #endif
-    
+
+#ifdef MQTT_USE_TLS
+    wifiClient.setCACert(MQTT_CA_CERT);
+#endif
+
     int retryCount = 0;
     int result = 0;
     bool connected = false;
